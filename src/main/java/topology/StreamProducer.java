@@ -18,7 +18,7 @@ public class StreamProducer implements Runnable {
     private boolean finished;
     private CanvasFrame canvasFrame;
 
-    final String FILENAME = "C:\\Users\\Intern04\\Downloads\\new\\Trash\\2.mp4";
+    final String FILENAME = "2.mp4";
     // [firstFrameId, lastFrameId)
     public StreamProducer(int firstFrameId, int lastFrameId) throws FrameRecorder.Exception {
         stream = new PriorityQueue<>();
