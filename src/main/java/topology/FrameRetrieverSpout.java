@@ -6,6 +6,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import logodetection.Debug;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
@@ -41,7 +42,8 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
         try {
             grabber.start();
-            System.out.println("Grabber started");
+            if (Debug.topologyDebugOutput)
+                System.out.println("Grabber started");
 
             while (++frameId < firstFrameId)
                 grabber.grab();
@@ -80,7 +82,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(800);
+                Thread.sleep(500);
             }
 
         } catch (FrameGrabber.Exception e) {

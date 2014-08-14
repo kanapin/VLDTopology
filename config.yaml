@@ -18,11 +18,11 @@ videoSourceFile: '1.mp4'
 
 # First frame from which the detection should start (inclusive).
 # Video starts with 0th frame
-firstFrameId: 35058
+firstFrameId: 35000
 
 # Last frame where detection should end (exclusive).
 # Frames in range [firstFrameId, lastFrameId-1] will be processed
-lastFrameId: 36000
+lastFrameId: 35200
 
 # Filename to save the output file to
 videoDestinationFile: '2.mp4'

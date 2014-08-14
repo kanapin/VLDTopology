@@ -36,13 +36,6 @@ public class Parameters {
         this.windowParameters = windowParameters;
     }
 
-    public DeconvolutionParameters getDeconvolutionParameters() {
-        return deconvolutionParameters;
-    }
-
-    public void setDeconvolutionParameters(DeconvolutionParameters deconvolutionParameters) {
-        this.deconvolutionParameters = deconvolutionParameters;
-    }
 
     public static class SIFTParameters {
         private double contrastThreshold, edgeThreshold, sigma;
@@ -188,7 +181,7 @@ public class Parameters {
             this.xStep = xStep;
         }
     }
-    public class DeconvolutionParameters {
+    public static class LogoTemplateParameters {
 
     }
 
@@ -197,13 +190,13 @@ public class Parameters {
     private RANSACParameters ransacParameters;
     private MatchingParameters matchingParameters;
     private WindowParameters windowParameters;
-    private DeconvolutionParameters deconvolutionParameters;
+    private LogoTemplateParameters logoTemplateParameters;
+
     public Parameters() {
         siftParameters = new SIFTParameters();
         ransacParameters = new RANSACParameters();
         matchingParameters = new MatchingParameters();
         windowParameters = new WindowParameters();
-        deconvolutionParameters = new DeconvolutionParameters();
     }
     public Parameters withSIFTParameters(SIFTParameters siftParameters) {
         this.siftParameters = siftParameters;
@@ -219,10 +212,6 @@ public class Parameters {
     }
     public Parameters withWindowParameters(WindowParameters windowParameters) {
         this.windowParameters = windowParameters;
-        return this;
-    }
-    public Parameters withDeconvolutionParameters(DeconvolutionParameters deconvolutionParameters) {
-        this.deconvolutionParameters = deconvolutionParameters;
         return this;
     }
 

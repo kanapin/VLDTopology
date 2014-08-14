@@ -9,12 +9,23 @@ import org.bytedeco.javacpp.opencv_core;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by Intern04 on 4/8/2014.
+/**This class provides kryo serialization for the JavaCV's Mat and Rect objects, so that Storm can wrap them in tuples.
+ *         Serializable.Mat - kryo serializable analog of opencv_core.Mat object.<p>
+ *         Serializable.Rect - kryo serializable analog of opencv_core.Rect object.<p>
+ *         Serializable.PatchIdentifier is also kryo serializable object,
+ *         which is used to identify each patch of the frame.<p>
+ *         <p>
+ * @author Nurlan Kanapin
+ * @see Serializable.Mat
+ * @see Serializable.Rect
+ * @see Serializable.PatchIdentifier
  */
 public class Serializable {
 
-    /* Fields of serializable class cannot be final. Use carefully. */
+    /**
+     * Kryo Serializable Mat class.
+     * Essential fields are image data itself, rows and columns count and type of the data.
+     */
     public static class Mat implements KryoSerializable {
         private byte[] data;
         private int rows, cols, type;
@@ -35,17 +46,29 @@ public class Serializable {
             return type;
         }
 
-        public Mat(int rows, int cols, int type, byte [] data) {
+        /**
+         * Creates new serializable Mat given its format and data.
+         *
+         * @param rows Number of rows in the Mat object
+         * @param cols Number of columns in the Mat object
+         * @param type OpenCV type of the data in the Mat object
+         * @param data Byte data containing image.
+         */
+        public Mat(int rows, int cols, int type, byte[] data) {
             this.rows = rows;
             this.cols = cols;
             this.type = type;
             this.data = data;
         }
+
+        /**
+         * Creates new serializable Mat from opencv_core.Mat
+         *
+         * @param mat The opencv_core.Mat
+         */
         public Mat(opencv_core.Mat mat) {
             if (!mat.isContinuous())
                 mat = mat.clone();
-            if (!mat.isContinuous())
-                throw new IllegalArgumentException("Matrix is not continuous");
 
             rows = mat.rows();
             cols = mat.cols();
@@ -59,42 +82,52 @@ public class Serializable {
                 bb.get(data);
         }
 
+        /**
+         * @return Converts this Serializable Mat into JavaCV's Mat
+         */
         public opencv_core.Mat toJavaCVMat() {
             return new opencv_core.Mat(rows, cols, type, new BytePointer(data));
         }
 
-     @Override
-     public void write(Kryo kryo, Output output) {
-         output.write(rows);
-         output.write(cols);
-         output.write(type);
-         output.write(data);
-     }
+        @Override
+        public void write(Kryo kryo, Output output) {
+            output.write(rows);
+            output.write(cols);
+            output.write(type);
+            output.write(data);
+        }
 
-     @Override
-     public void read(Kryo kryo, Input input) {
-         rows = input.readInt();
-         cols = input.readInt();
-         type = input.readInt();
-         input.read(data);
-     }
- }
+        @Override
+        public void read(Kryo kryo, Input input) {
+            rows = input.readInt();
+            cols = input.readInt();
+            type = input.readInt();
+            input.read(data);
+        }
+    }
 
-
+    /**
+     * Kryo Serializable Rect class.
+     *
+     */
     public static class Rect implements KryoSerializable {
+        /** x, y, width, height - x and y coordinates of the left upper corner of the rectangle, its width and height */
         public int x, y, width, height;
+
         public Rect(opencv_core.Rect rect) {
             x = rect.x();
             y = rect.y();
             width = rect.width();
             height = rect.height();
         }
+
         public Rect(int x, int y, int width, int height) {
             this.x = x;
             this.y = y;
             this.height = height;
             this.width = width;
         }
+
         public opencv_core.Rect toJavaCVRect() {
             return new opencv_core.Rect(x, y, width, height);
         }
@@ -140,10 +173,21 @@ public class Serializable {
         }
     }
 
-    /* This is a class which identifies each patch*/
-    public static class PatchIdentifier implements  KryoSerializable {
+    /** This is a serializable class used for patch identification. Each patch needs to be distinguished form others.
+     * Each patch is uniquely identified by the id of its frame and by the rectangle it corresponds to.
+     *
+     */
+    public static class PatchIdentifier implements KryoSerializable {
+        /** Frame id of this patch */
         public int frameId;
+        /** Rectangle or Region of Interest of this patch. */
         public Rect roi;
+
+        /**
+         * Creates PatchIdentifier with given frame id and rectangle.
+         * @param frameId
+         * @param roi
+         */
         public PatchIdentifier(int frameId, Rect roi) {
             this.roi = roi;
             this.frameId = frameId;
@@ -161,12 +205,17 @@ public class Serializable {
         @Override
         public void read(Kryo kryo, Input input) {
             frameId = input.readInt();
-            int     x = input.readInt(),
+            int x = input.readInt(),
                     y = input.readInt(),
                     width = input.readInt(),
                     height = input.readInt();
             roi = new Rect(x, y, width, height);
         }
+
+        /**
+         * String representation of this patch identifier.
+         * @return the string in the format N%04d@%04d@%04d@%04d@%04d if roi is not null, and N%04d@null otherwise.
+         */
         public String toString() {
             if (roi != null)
                 return String.format("N%04d@%04d@%04d@%04d@%04d", frameId, roi.x, roi.y, roi.x + roi.width, roi.y + roi.height);

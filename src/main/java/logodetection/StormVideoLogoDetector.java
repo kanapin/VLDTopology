@@ -1,21 +1,5 @@
 package logodetection;
-/*** ==============================Definitions==========================
- * 1. Query image, query logo, logo template - images of logos we are looking for.
- *
- * 2. Train image, frame image - image of the frame in which we are looking for logos.
- *
- * 3. Homography matrix, homography - 3x3 transformation matrix, which projects our logo template onto the
- *    frame space. Usually we project the corners of our template logo onto a frame to obtain the
- *    quadrilateral, which determines the locations of the detected logo.
- *
- * 4. RoI, roi - region of interest. Usually this is the rectangle corresponding to the part of the image
- *    which we are examining.
- *
- *
- *
- *
- *
- ***/
+
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,51 +16,100 @@ import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
 import org.bytedeco.javacpp.opencv_nonfree.SIFT;
 import topology.Serializable;
 
-/**
- * Created by nurlan on 8/05/14.
- */
+/** This is a detector, which stores logo templates ({@link logodetection.LogoTemplate}),
+ * and, given a patch of the frame, attempts to find a logo on it by matching it against each logo template.
+ * Logo templates are checked in order of their decreasing priority. They are stored in two separate lists:
+ * {@link #originalTemplates} and {@link #addedTemplates}. The first one contains static original logo templates,
+ * the second one, initially empty, contains dynamically added logo templates.
+ * <p>
+ *  ==============================Definitions==========================<p>
+ * 1. Query image, query logo, logo template - images of logos we are looking for.
+ *<p>
+ * 2. Train image, frame image - image of the frame in which we are looking for logos.
+ *<p>
+ * 3. Homography matrix, homography - 3x3 transformation matrix, which projects our logo template onto the
+ *    frame space. Usually we project the corners of our template logo onto a frame to obtain the
+ *    quadrilateral, which determines the locations of the detected logo.
+ *<p>
+ * 4. RoI, roi - region of interest. Usually this is a rectangle corresponding to the part of the image
+ *    which we are examining.
+ *<p>
+ * 5. Original, Static logo templates - those that were added at the beginning.
+ * <p>
+ * 6. Added, Dynamic logo templates - those that were added during the detection.
+ * <p>
+ * Usage:<p>
+ * 1. Initialize detector with original logo templates {@link logodetection.LogoTemplate}.
+ * Also specify Parameters {@link logodetection.Parameters}
+ * for detections such as parameters for SIFT feature extractor, RANSAC algorithm and others.
+ * <p>
+ * 2. Feed patches of the frames to the detector one by one using
+ * {@link #detectLogosInRoi(org.bytedeco.javacpp.opencv_core.Mat, org.bytedeco.javacpp.opencv_core.Rect, int)}
+ * <p>
+ * 3. If detector detected some logo on the patch you can access its rectangle by {@link #getFoundRect()}. If
+ * {@link #getFoundRect()} returns null, then no logo has been detected on this patch.
+ * <p>
+ * 4. If you wish to add a new logo template (for example, you extracted a template from some frame), you should call
+ * {@link #addTemplate(topology.Serializable.PatchIdentifier, topology.Serializable.Mat)}.
+ * <p>
+ * 5. Also you may want to increment the priority of the existing logo template. Then you call
+ * {@link #incrementPriority(topology.Serializable.PatchIdentifier, int)}.
+ *
+ * @see logodetection.LogoTemplate
+ * @see logodetection.RobustMatcher
+ ***/
 public class StormVideoLogoDetector {
 
-    /* These are for storing Images of searched logos, their key points and their descriptors */
+    /** Stores original static logo templates */
     private ArrayList<LogoTemplate> originalTemplates;
+
+    /** Stores dynamically added logo templates */
     private ArrayList<LogoTemplate> addedTemplates;
 
-    /* Parameters for detection */
+    /** Parameters for detection */
     private Parameters params;
+
+    /** SIFT object for feature extraction */
     private SIFT sift;
+
+    /** Matcher, which performs all matching and refinement */
     private RobustMatcher robustMatcher;
 
-    /* The rectangle corresponding to detected logo */
+    /** If logo is found this will reference the rectangle corresponding to detected logo */
     private Serializable.Rect foundRect;
+    /** If logo is found this will reference the logo template extracted from this patch */
     private Serializable.Mat extractedTemplate;
+    /** If logo is found this will reference the template using which the logo was detected */
     private LogoTemplate parent;
 
-    /* Initialize and precompute all key points, descriptors for template logos */
+    /**
+     * Initializes and precomputes all key points and descriptors for static template logos
+     * @param params The parameters for logo detection and matching.
+     * @param fileNames The list of paths to files containing images of the original logos
+     */
     public StormVideoLogoDetector(Parameters params, List<String> fileNames) {
         if (Debug.logoDetectionDebugOutput)
             System.out.println("Initializing logos...");
 
+        // Initialize lists and matcher and sift
         this.params = params;
         originalTemplates = new ArrayList<LogoTemplate>();
         addedTemplates = new ArrayList<LogoTemplate>();
         robustMatcher = new RobustMatcher(params);
-
-        // TODO: if too few features are detected, tune coefficients of sift and retry.
         sift = new SIFT(0, 3, params.getSiftParameters().getContrastThreshold(),
                 params.getSiftParameters().getEdgeThreshold(), params.getSiftParameters().getSigma());
 
+        // This is the index of the original logo templates
         int index = 0;
         for (String fileName : fileNames)
         {
             try
             {
                 Mat tmp = new Mat(IplImage.createFrom(ImageIO.read(new FileInputStream(fileName))));
-
                 Mat descriptor = new Mat();
                 KeyPoint keyPoints = new KeyPoint();
                 sift.detectAndCompute(tmp, Mat.EMPTY, keyPoints, descriptor);
-                // TODO check if template logo has enough descriptors & matches
-                // TODO original templates have negative ids and null roi.
+                // Original templates have negative ids and null roi.
                 originalTemplates.add(new LogoTemplate(tmp, keyPoints, descriptor, new Serializable.PatchIdentifier(-index - 1, null)));
                 index ++;
             }
@@ -91,26 +124,34 @@ public class StormVideoLogoDetector {
     }
 
 
-
-
+    /**
+     * This methods looks for logos on the part of the frame defined by roi.
+     * @param frame The image Mat containing the whole logo
+     * @param roi The rectangle corresponding the this patch
+     * @param frameId The id of the frame
+     */
     public void detectLogosInRoi(Mat frame, Rect roi, int frameId) {
-
+        // Make the results of previous detection null
         foundRect = null;
+        extractedTemplate = null;
+        parent = null;
+
+        // Obtain the keypoints, descriptors of the patch
         Mat r = new Mat(frame, roi);
         KeyPoint keyPoints = new KeyPoint();
         Mat testDescriptors = new Mat();
-        // make r continuous
-        Mat rr = r.clone();
+        Mat rr = r.clone(); // make r continuous
         r.release();
-
         sift.detectAndCompute(rr, Mat.EMPTY, keyPoints, testDescriptors);
 
+        // Sort list by decreasing order of priority
         Collections.sort(originalTemplates);
         for (LogoTemplate lt : originalTemplates) {
             if (keyPoints.capacity() >= params.getMatchingParameters().getMinimalNumberOfMatches() &&
                     robustMatcher.matchImages(lt.imageMat, lt.descriptor, lt.keyPoints,
                             rr, testDescriptors, keyPoints, roi))
             {
+                // If logo is found update the results and break.
                 parent = lt;
                 foundRect = robustMatcher.getFoundRect();
                 extractedTemplate = robustMatcher.getExtractedTemplate();
@@ -118,8 +159,8 @@ public class StormVideoLogoDetector {
             }
         }
 
-        if (foundRect == null) { // If logo hasn't been yet found
-
+        if (foundRect == null) {
+            // If logo hasn't been yet found, sort list of dynamic templates.
             Collections.sort(addedTemplates);
             if (addedTemplates.size() > 5)
                 addedTemplates.remove(addedTemplates.size() - 1);
@@ -129,6 +170,7 @@ public class StormVideoLogoDetector {
                         robustMatcher.matchImages(lt.imageMat, lt.descriptor, lt.keyPoints,
                                 rr, testDescriptors, keyPoints, roi))
                 {
+                    // If logo is found update the results and break.
                     parent = lt;
                     foundRect = robustMatcher.getFoundRect();
                     extractedTemplate = robustMatcher.getExtractedTemplate();
@@ -136,28 +178,50 @@ public class StormVideoLogoDetector {
                 }
             }
         }
-
+        // Manually force JVM to release this.
         rr.release();
         keyPoints.deallocate();
         testDescriptors.release();
     }
 
-    // This I added trying to get rid of javacv's bug
+    @Deprecated// This I added trying to get rid of javacv's bug
     public void finish() {
         sift.deallocate();
     }
 
+    /**
+     * If logo was detected, you may get its global coordinates (relative to the whole frame)
+     * @return the rectangle enclosing detected logo
+     */
     public Serializable.Rect getFoundRect() {
         return foundRect;
     }
 
+    /**
+     * If logo was detected, this you can get the Mat of the image, corresponding to this extracted template.
+     * Usually you send it to other bolts, so that they can update their logo template list.
+     * @return Mat containing the image of the extracted template
+     */
     public Serializable.Mat getExtractedTemplate() {
         return extractedTemplate;
     }
 
+    /**
+     * This returns the identifier of the template, using which the logo was detected, so called 'parent' template.
+     * Usually you send it to other bolts, so that they update its priority.
+     * @return identifier of parent template.
+     */
     public Serializable.PatchIdentifier getParentIdentifier() {
         return parent.identifier;
     }
+
+    /**
+     * Finds a logo template identified by given patch identifier and increments its priority by value.
+     * @param identifier - the patch identifier to identify the logo template, which priority needs to be updated
+     * @param value - the amount by which its priority should be updated
+     * @return true if the corresponding template was found and updated and false otherwise. False may happen
+     * if this particular detector hasn't been updated by the Storm with this logo template.
+     */
     public boolean incrementPriority(Serializable.PatchIdentifier identifier, int value) {
         for ( LogoTemplate lt : originalTemplates) {
             if (lt.identifier.equals(identifier)) {
@@ -173,6 +237,12 @@ public class StormVideoLogoDetector {
         }
         return false;
     }
+
+    /**
+     * Adds template.
+     * @param identifier The identifier of the patch, from which this template was extracted.
+     * @param mat Image of the logo template
+     */
     public void addTemplate(Serializable.PatchIdentifier identifier, Serializable.Mat mat) {
         if (addedTemplates.size() >= 5)
             return;
@@ -183,6 +253,11 @@ public class StormVideoLogoDetector {
         addedTemplates.add(new LogoTemplate(image, keyPoints, descriptor, identifier));
 
     }
+
+    /**
+     * For debug only. Returns the string representation of the content the logo template lists.
+     * @return String representation of the lists.
+     */
     public String getTemplateInfo() {
         return "" + originalTemplates + ", " + addedTemplates;
     }
