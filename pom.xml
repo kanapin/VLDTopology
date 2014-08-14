@@ -113,7 +113,13 @@
         <profile>
             <id>linux</id>
             <properties>
-                <build.type>linux</build.type>
+                <build.type>linux-x86_64</build.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>MacOSX</id>
+            <properties>
+                <build.type>macosx-x86_64</build.type>
             </properties>
         </profile>
     </profiles>
