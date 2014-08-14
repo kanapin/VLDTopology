@@ -22,7 +22,7 @@ firstFrameId: 35058
 
 # Last frame where detection should end (exclusive).
 # Frames in range [firstFrameId, lastFrameId-1] will be processed
-lastFrameId: 35273
+lastFrameId: 36000
 
 # Filename to save the output file to
 videoDestinationFile: '2.mp4'
