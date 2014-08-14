@@ -12,30 +12,38 @@ import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 import java.util.Map;
 
+import static topology.StormConfigManager.getInt;
+import static topology.StormConfigManager.getString;
+
 
 /**
  * Created by Intern04 on 4/8/2014.
  */
 public class FrameRetrieverSpout extends BaseRichSpout {
     SpoutOutputCollector collector;
-    final private String SOURCE_FILE = "1.mp4";
+    private String SOURCE_FILE;
     private FrameGrabber grabber;
     private int frameId;
 
-    //int lim = 31685; // SONY
-    int lim = 35058; // mc starts to detect
-    //int lim = 0;
+    int firstFrameId ;
+    int lastFrameId ;
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+
+        frameId = 0;
+        firstFrameId = getInt(map, "firstFrameId");
+        lastFrameId = getInt(map, "lastFrameId");
+        SOURCE_FILE = getString(map, "videoSourceFile");
+
         this.collector = spoutOutputCollector;
         grabber = new OpenCVFrameGrabber(SOURCE_FILE);
-        frameId = 0;
+
         try {
             grabber.start();
             System.out.println("Grabber started");
 
-            while (++frameId < lim)
+            while (++frameId < firstFrameId)
                 grabber.grab();
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
@@ -46,7 +54,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         try {
-            if (frameId < lim + 215) {
+            if (frameId < lastFrameId) {
                 image = grabber.grab();
                 opencv_core.Mat frameMat = new opencv_core.Mat(image);
                 Serializable.Mat sMat = new Serializable.Mat(frameMat);
@@ -72,7 +80,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(500);
+                Thread.sleep(800);
             }
 
         } catch (FrameGrabber.Exception e) {

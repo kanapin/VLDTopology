@@ -3,7 +3,6 @@ package logodetection;
 import org.bytedeco.javacpp.opencv_calib3d;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_features2d;
-import org.bytedeco.javacpp.opencv_nonfree;
 import org.bytedeco.javacv.JavaCV;
 import topology.Serializable;
 
@@ -172,7 +171,7 @@ public class RobustMatcher {
 
         opencv_core.Mat homography = getHomography(logoKeyPoints, frameRegionKeyPoints);
         if (homography == null || homography.isNull()) {
-            if (Debug.printDebug)
+            if (Debug.logoDetectionDebugOutput)
                 System.out.println("No homography found");
             return false;
         }

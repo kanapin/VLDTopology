@@ -159,7 +159,7 @@ public class Parameters {
         private double [] windowSizes;
         private double xStep, yStep;
         public WindowParameters() {
-            windowSizes = new double[]{.25}; // by default the whole frame, quarters and 1/16
+            windowSizes = new double[]{.25}; // by default 1/4 of the frame
             xStep = .33; // in terms of window size
             yStep = .33;
         }

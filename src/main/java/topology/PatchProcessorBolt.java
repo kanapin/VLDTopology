@@ -12,7 +12,11 @@ import logodetection.Parameters;
 import logodetection.StormVideoLogoDetector;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+
+import static topology.StormConfigManager.getListOfStrings;
+import static topology.StormConfigManager.getString;
 
 /**
  * Created by Intern04 on 5/8/2014.
@@ -21,9 +25,6 @@ public class PatchProcessorBolt extends BaseRichBolt {
     OutputCollector collector;
     private StormVideoLogoDetector detector;
     HashSet<Serializable.PatchIdentifier> received;
-    // TODO: This should be taken from the config, or even from Internet =)
-    //final private String SOURCE_FILE = "C:/Users/Intern04/Downloads/new/VideoLogoDetector1.2/sony.jpg";
-    final private String SOURCE_FILE = "mc2.jpg";
 
 
     @Override
@@ -35,7 +36,9 @@ public class PatchProcessorBolt extends BaseRichBolt {
                         new Parameters.MatchingParameters()
                                 .withMinimalNumberOfMatches(4)
                 );
-        detector = new StormVideoLogoDetector(parameters, SOURCE_FILE);
+
+        List<String> templateFiles = getListOfStrings(map, "originalTemplateFileNames");
+        detector = new StormVideoLogoDetector(parameters, templateFiles);
         received = new HashSet<>();
     }
 

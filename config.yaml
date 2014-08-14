@@ -1,0 +1,54 @@
+
+########### Additional settings
+
+
+
+# Do output debug in the detection algorithms?
+logoDetectionDebugOutput: false
+
+# Do output debug in the topology?
+topologyDebugOutput: true
+
+# List of file names from which to parse original logo templates
+originalTemplateFileNames:
+  - 'mc2.jpg'
+
+# Video file to read the video from
+videoSourceFile: '1.mp4'
+
+# First frame from which the detection should start (inclusive).
+# Video starts with 0th frame
+firstFrameId: 35058
+
+# Last frame where detection should end (exclusive).
+# Frames in range [firstFrameId, lastFrameId-1] will be processed
+lastFrameId: 35273
+
+# Filename to save the output file to
+videoDestinationFile: '2.mp4'
+
+# Amount of parallelism for FrameRetrieverSpout. Should be always 1, since it reads input file.
+FrameRetrieverSpout.parallelism: 1
+
+# Amount of parallelism for PatchProcessorBolt
+PatchProcessorBolt.parallelism: 8
+
+# Amount of parallelism for PatchAggregatorBolt
+PatchAggregatorBolt.parallelism: 1
+
+# Amount of parallelism for FrameAggregatorBolt. Should be always 1.
+FrameAggregatorBolt.parallelism: 1
+
+#
+FrameRetrieverSpout.tasks: 1
+
+#
+PatchProcessorBolt.tasks: 8
+
+#
+PatchAggregatorBolt.tasks: 2
+
+#
+FrameAggregatorBolt.tasks: 1
+
+

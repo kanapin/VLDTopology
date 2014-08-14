@@ -78,7 +78,7 @@ public class Util {
 
         // TODO: adjust these constants.
         if (xMax - xMin < 10 || yMax - yMin < 10) {
-            if (Debug.printDebug)
+            if (Debug.logoDetectionDebugOutput)
                 System.out.println("Of too small resolution");
             return false;
         }
@@ -86,7 +86,7 @@ public class Util {
 
         // TODO: update 07/21. If the quadrilateral is too large with respect to roi, it is counted as bad
         if (wx > 2 * roi.width() || hy > 2 * roi.height()) {
-            if (Debug.printDebug)
+            if (Debug.logoDetectionDebugOutput)
                 System.out.println("Too large");
             return false;
         }
@@ -94,12 +94,12 @@ public class Util {
 
         // TODO: update 07/21 If quadrilateral is too 'flattened' return false (Area < C * Bounding_box_area), C = 1/2
         if (Util.area(scene_corners) < .5 * (xMax - xMin) * (yMax - yMin)) {
-            if (Debug.printDebug)
+            if (Debug.logoDetectionDebugOutput)
                 System.out.println("Of too small area");
             return false;
         }
         if (!Util.isConvex(scene_corners)) {
-            if (Debug.printDebug)
+            if (Debug.logoDetectionDebugOutput)
                 System.out.println("not a convex");
             return false;
         }

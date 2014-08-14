@@ -20,24 +20,16 @@ package logodetection;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.bytedeco.javacpp.opencv_calib3d;
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Point2f;
 import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_features2d;
-import org.bytedeco.javacpp.opencv_features2d.BFMatcher;
-import org.bytedeco.javacpp.opencv_features2d.DMatchVectorVector;
 import org.bytedeco.javacpp.opencv_features2d.KeyPoint;
 import org.bytedeco.javacpp.opencv_nonfree.SIFT;
-import org.bytedeco.javacv.JavaCV;
 import topology.Serializable;
 
 /**
@@ -60,8 +52,8 @@ public class StormVideoLogoDetector {
     private LogoTemplate parent;
 
     /* Initialize and precompute all key points, descriptors for template logos */
-    public StormVideoLogoDetector(Parameters params, String... fileNames) {
-        if (Debug.printDebug)
+    public StormVideoLogoDetector(Parameters params, List<String> fileNames) {
+        if (Debug.logoDetectionDebugOutput)
             System.out.println("Initializing logos...");
 
         this.params = params;
@@ -73,26 +65,28 @@ public class StormVideoLogoDetector {
         sift = new SIFT(0, 3, params.getSiftParameters().getContrastThreshold(),
                 params.getSiftParameters().getEdgeThreshold(), params.getSiftParameters().getSigma());
 
-        for (int i = 0 ; i < fileNames.length ; i ++)
+        int index = 0;
+        for (String fileName : fileNames)
         {
             try
             {
-                Mat tmp = new Mat(IplImage.createFrom(ImageIO.read(new FileInputStream(fileNames[i]))));
+                Mat tmp = new Mat(IplImage.createFrom(ImageIO.read(new FileInputStream(fileName))));
 
                 Mat descriptor = new Mat();
                 KeyPoint keyPoints = new KeyPoint();
                 sift.detectAndCompute(tmp, Mat.EMPTY, keyPoints, descriptor);
                 // TODO check if template logo has enough descriptors & matches
                 // TODO original templates have negative ids and null roi.
-                originalTemplates.add(new LogoTemplate(tmp, keyPoints, descriptor, new Serializable.PatchIdentifier(-i - 1, null)));
+                originalTemplates.add(new LogoTemplate(tmp, keyPoints, descriptor, new Serializable.PatchIdentifier(-index - 1, null)));
+                index ++;
             }
             catch (IOException e)
             {
                 e.printStackTrace();
-                System.err.println("StormLogoDetector(): Could not open file " + fileNames[i]);
+                System.err.println("StormLogoDetector(): Could not open file " + fileName);
             }
         }
-        if (Debug.printDebug)
+        if (Debug.logoDetectionDebugOutput)
             System.out.println("Initialization of logo templates complete.");
     }
 
@@ -106,15 +100,16 @@ public class StormVideoLogoDetector {
         KeyPoint keyPoints = new KeyPoint();
         Mat testDescriptors = new Mat();
         // make r continuous
-        r = r.clone();
+        Mat rr = r.clone();
+        r.release();
 
-        sift.detectAndCompute(r, Mat.EMPTY, keyPoints, testDescriptors);
+        sift.detectAndCompute(rr, Mat.EMPTY, keyPoints, testDescriptors);
 
         Collections.sort(originalTemplates);
         for (LogoTemplate lt : originalTemplates) {
             if (keyPoints.capacity() >= params.getMatchingParameters().getMinimalNumberOfMatches() &&
                     robustMatcher.matchImages(lt.imageMat, lt.descriptor, lt.keyPoints,
-                            r, testDescriptors, keyPoints, roi))
+                            rr, testDescriptors, keyPoints, roi))
             {
                 parent = lt;
                 foundRect = robustMatcher.getFoundRect();
@@ -132,7 +127,7 @@ public class StormVideoLogoDetector {
             for (LogoTemplate lt : addedTemplates) {
                 if (keyPoints.capacity() >= params.getMatchingParameters().getMinimalNumberOfMatches() &&
                         robustMatcher.matchImages(lt.imageMat, lt.descriptor, lt.keyPoints,
-                                r, testDescriptors, keyPoints, roi))
+                                rr, testDescriptors, keyPoints, roi))
                 {
                     parent = lt;
                     foundRect = robustMatcher.getFoundRect();
@@ -142,7 +137,7 @@ public class StormVideoLogoDetector {
             }
         }
 
-        r.release();
+        rr.release();
         keyPoints.deallocate();
         testDescriptors.release();
     }

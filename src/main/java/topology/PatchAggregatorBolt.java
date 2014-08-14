@@ -7,6 +7,7 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import logodetection.Debug;
 
 import java.util.*;
 
@@ -52,7 +53,8 @@ public class PatchAggregatorBolt extends BaseRichBolt {
 
         /* If all patches of this frame are collected proceed to the frame aggregator */
         if (frameAccount.get(frameId).size() == patchCount) {
-            System.out.println("All parts of frame " + frameId + " received");
+            if (Debug.topologyDebugOutput)
+                System.out.println("All parts of frame " + frameId + " received");
             collector.emit("stream-to-frame-aggregator", tuple, new Values(frameId, mat, foundRectAccount.get(frameId)));
             frameAccount.remove(frameId);
             foundRectAccount.remove(frameId);
