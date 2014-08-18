@@ -95,8 +95,8 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream("patch-stream", new Fields("patchIdentifier",
-                "frameMat", "patchCount"));
+        outputFieldsDeclarer.declareStream("patch-stream", new Fields("patchIdentifier"));
+        outputFieldsDeclarer.declareStream("frame-stream-to-patch-processor", new Fields("frameId", "frameMat", "patchCount"));
     }
 
 
