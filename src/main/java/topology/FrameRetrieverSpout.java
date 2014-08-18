@@ -74,7 +74,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                         patchCount++;
 
                 for (int x = 0; x + w <= W; x += dx) {
-                    for (int y = 0; y + h <= H; y += dy) { // N23@150,120-250,240
+                    for (int y = 0; y + h <= H; y += dy) {
                         Serializable.PatchIdentifier identifier = new
                                 Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
 
@@ -82,7 +82,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(500);
+                Thread.sleep(600);
             }
 
         } catch (FrameGrabber.Exception e) {
