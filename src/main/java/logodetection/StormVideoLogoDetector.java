@@ -44,7 +44,7 @@ import topology.Serializable;
  * for detections such as parameters for SIFT feature extractor, RANSAC algorithm and others.
  * <p>
  * 2. Feed patches of the frames to the detector one by one using
- * {@link #detectLogosInRoi(org.bytedeco.javacpp.opencv_core.Mat, org.bytedeco.javacpp.opencv_core.Rect, int)}
+ * {@link #detectLogosInRoi(org.bytedeco.javacpp.opencv_core.Mat, org.bytedeco.javacpp.opencv_core.Rect)}
  * <p>
  * 3. If detector detected some logo on the patch you can access its rectangle by {@link #getFoundRect()}. If
  * {@link #getFoundRect()} returns null, then no logo has been detected on this patch.
@@ -128,9 +128,8 @@ public class StormVideoLogoDetector {
      * This methods looks for logos on the part of the frame defined by roi.
      * @param frame The image Mat containing the whole logo
      * @param roi The rectangle corresponding the this patch
-     * @param frameId The id of the frame
      */
-    public void detectLogosInRoi(Mat frame, Rect roi, int frameId) {
+    public void detectLogosInRoi(Mat frame, Rect roi) {
         // Make the results of previous detection null
         foundRect = null;
         extractedTemplate = null;
@@ -184,11 +183,6 @@ public class StormVideoLogoDetector {
         testDescriptors.release();
     }
 
-    @Deprecated// This I added trying to get rid of javacv's bug
-    public void finish() {
-        sift.deallocate();
-    }
-
     /**
      * If logo was detected, you may get its global coordinates (relative to the whole frame)
      * @return the rectangle enclosing detected logo
@@ -239,7 +233,7 @@ public class StormVideoLogoDetector {
     }
 
     /**
-     * Adds template.
+     * Adds template to the dynamic list of logo templates.
      * @param identifier The identifier of the patch, from which this template was extracted.
      * @param mat Image of the logo template
      */
@@ -256,6 +250,7 @@ public class StormVideoLogoDetector {
 
     /**
      * For debug only. Returns the string representation of the content the logo template lists.
+     * @see LogoTemplate#toString()
      * @return String representation of the lists.
      */
     public String getTemplateInfo() {

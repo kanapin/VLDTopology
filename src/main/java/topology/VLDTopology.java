@@ -48,7 +48,7 @@ public class VLDTopology {
         StormTopology topology = builder.createTopology();
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("first", conf, topology);
-        Thread.sleep(3*60*1000);
+        Thread.sleep(4*60*1000);
         cluster.killTopology("first");
         cluster.shutdown();
         //StormSubmitter.submitTopology("first", new Config(), topology);

@@ -67,7 +67,7 @@ public class PatchProcessorBolt extends BaseRichBolt {
             Serializable.Mat mat = (Serializable.Mat) tuple.getValueByField("frameMat");
             int patchCount = (int) tuple.getValueByField("patchCount");
 
-            detector.detectLogosInRoi(mat.toJavaCVMat(), patchIdentifier.roi.toJavaCVRect(), patchIdentifier.frameId);
+            detector.detectLogosInRoi(mat.toJavaCVMat(), patchIdentifier.roi.toJavaCVRect());
             Serializable.Rect foundRect = detector.getFoundRect();
 
             /* Notify other bolts that new logo template is added with priority 0*/

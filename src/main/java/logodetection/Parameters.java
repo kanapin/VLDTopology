@@ -181,16 +181,12 @@ public class Parameters {
             this.xStep = xStep;
         }
     }
-    public static class LogoTemplateParameters {
-
-    }
 
 
     private SIFTParameters siftParameters;
     private RANSACParameters ransacParameters;
     private MatchingParameters matchingParameters;
     private WindowParameters windowParameters;
-    private LogoTemplateParameters logoTemplateParameters;
 
     public Parameters() {
         siftParameters = new SIFTParameters();
