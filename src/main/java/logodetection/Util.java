@@ -7,9 +7,14 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * Created by Nurlan Kanapin on 25/7/2014.
+ * This class provides static geometric methods for refining the results given by RANSAC algorithm
+ * {@link logodetection.RobustMatcher#matchImages(org.bytedeco.javacpp.opencv_core.Mat, org.bytedeco.javacpp.opencv_core.Mat,
+ * org.bytedeco.javacpp.opencv_features2d.KeyPoint, org.bytedeco.javacpp.opencv_core.Mat, org.bytedeco.javacpp.opencv_core.Mat,
+ * org.bytedeco.javacpp.opencv_features2d.KeyPoint, org.bytedeco.javacpp.opencv_core.Rect)}
  */
 public class Util {
+
+    /** Draws rectangle on given image matrix with color given as a scalar */
     public static void drawRectOnMat(opencv_core.Rect r, opencv_core.Mat finalImage, opencv_core.CvScalar scalar) {
         opencv_core.Scalar color = new opencv_core.Scalar(scalar);
         opencv_core.Point A = new opencv_core.Point(r.x(), r.y()), B = new opencv_core.Point(r.x() + r.width(), r.y()),
@@ -19,6 +24,13 @@ public class Util {
         opencv_core.line(finalImage, C, D, color, 4, 4, 0);
         opencv_core.line(finalImage, D, A, color, 4, 4, 0);
     }
+
+    /**
+     *  Draws quadrilateral on given image matrix with color given as a scalar
+     * @param Q 4x2 array with coordinates of the quadrilateral
+     * @param finalImage image matrix on which to draw an image
+     * @param scalar the color
+     */
     public static void drawQonMat(double [][] Q, opencv_core.Mat finalImage, opencv_core.CvScalar scalar) {
         opencv_core.Scalar color = new opencv_core.Scalar(scalar);
         for (int i = 0; i < 4; i++) {
@@ -27,7 +39,15 @@ public class Util {
 
         }
     }
+
+    /** epsilon for checking whether doubles are positive or negative {@link #CCW(double[], double[], double[])} */
     final static double eps = 1e-2;
+
+    /**
+     * Is the quadrilateral convex?
+     * @param corners - the 4x2 array of doubles - the coordinates of corners given in counter clockwise order
+     * @return true if argument is a convex quadrilateral and false otherwise.
+     */
     public static boolean isConvex(double [][] corners) {
         assert corners.length == 4;
         for (int i = 0 ; i < 4 ; i ++)
@@ -36,15 +56,28 @@ public class Util {
             int prev = (i - 1 + 4) % 4, next = ( i + 1 ) % 4;
             if (CCW(corners[prev], corners[i], corners[next]))
                 return false;
-
         }
         return true;
     }
+
+    /**
+     * Are points a, b and c are in clockwise order?
+     * @param a
+     * @param b
+     * @param c
+     * @return true, if a, b, c are in CCW order
+     */
     public static boolean CCW(double[] a, double[] b, double[] c) {
         double x1 = a[0] - b[0], y1 = a[1] - b[1];
         double x2 = c[0] - b[0], y2 = c[1] - b[1];
         return x1 * y2 - x2 * y1 > eps;
     }
+
+    /**
+     * Returns the area of quadrilateral.
+     * @param p corners of quadrilateral given in CCW order
+     * @return area
+     */
     public static double area(double [][] p) {
         double res = 0.0;
         for (int i = 0 ; i < 4 ; i ++) {
@@ -52,6 +85,18 @@ public class Util {
         }
         return Math.abs(res);
     }
+
+    /**
+     * Performs testing of quadrilateral obtained by transformation of the corners of logo template onto frame, after
+     * the logo has been detected.
+     * 1. Checks if it's not smaller than 10x10 pixel square <p>
+     * 2. Checks if it's not too large and does fall outside the patch <p>
+     * 3. Checks if it's not too flattened <p>
+     * 4. Checks that it is a convex quadrilateral.
+     * @param scene_corners corners of quadrilateral
+     * @param roi the patch coordinates where this logo
+     * @return true if quadrilateral satisfies all requirements, false otherwise.
+     */
     public static boolean checkQuadrilateral(double [][] scene_corners, opencv_core.Rect roi) {
         double xMax = 0.0, xMin = 1e100;
         double yMax = 0.0, yMin = 1e100;
@@ -105,6 +150,13 @@ public class Util {
         }
         return true;
     }
+
+    /**
+     * Given list of points find the rectangle of minimal area which includes at least accuracy*100% points. O(n^3)
+     * @param list - list of 2D points
+     * @param accuracy - the ratio
+     * @return the rectangle enclosing points.
+     */
     public static opencv_core.Rect bestBoundingBoxFast(ArrayList<opencv_core.Point2f> list, double accuracy) {
         if (accuracy < 0.0 || accuracy > 1.0) {
             System.err.println("Not valid accuracy [0.0, 1.0]");

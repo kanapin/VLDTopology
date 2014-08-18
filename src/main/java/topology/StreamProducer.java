@@ -8,18 +8,31 @@ import org.bytedeco.javacv.OpenCVFrameRecorder;
 import java.util.PriorityQueue;
 
 /**
- * Created by Intern04 on 13/8/2014.
+ * This runnable class accepts stream frames, orders them and produces an ordered sequence of frames which is saved
+ * to a file. Also displays the results on the canvas as they appear.
  */
 public class StreamProducer implements Runnable {
+    /** Ordered queue for putting frames in order */
     private PriorityQueue<StreamFrame> stream;
+    /** Entity for producing a stream */
     private FrameRecorder recorder;
+    /** first and last frame to expect */
     final int firstFrameId, lastFrameId;
+
+    /** Currently expected frame */
     private int nextExpectedFrame;
+
+    /** Has the last expected frame come? */
     private boolean finished;
+
+    /** Canvas for displaying frames on the screen */
     private CanvasFrame canvasFrame;
 
+    /** TODO: put this into config? */
     final String FILENAME = "2.mp4";
-    // [firstFrameId, lastFrameId)
+
+
+    /** Creates a producer expecting frames in range [firstFrameId, lastFrameId) */
     public StreamProducer(int firstFrameId, int lastFrameId) throws FrameRecorder.Exception {
         stream = new PriorityQueue<>();
         this.firstFrameId = firstFrameId;
@@ -35,13 +48,17 @@ public class StreamProducer implements Runnable {
         finished = false;
     }
 
-
+    /** Add frame to the queue if it is fully processed */
     public void addFrame(StreamFrame streamFrame) {
         synchronized (stream) {
             stream.add(streamFrame);
         }
     }
 
+    /**
+     * Get expected frame from the queue.
+     * @return next expected frame, or null if it has not come yet.
+     */
     public StreamFrame getNextFrame() {
         synchronized (stream) {
             if (stream.isEmpty() || stream.peek().frameId != nextExpectedFrame) return null;
@@ -68,6 +85,7 @@ public class StreamProducer implements Runnable {
                         canvasFrame.dispose();
                     }
                 } else {
+                    // if expected frame is not there yet, wait and try again.
                     Thread.sleep(40);
                 }
             } catch (InterruptedException e) {

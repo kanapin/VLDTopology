@@ -1,7 +1,7 @@
 package logodetection;
 
 /**
- * Created by Intern04 on 13/8/2014.
+ * Class for debugging flags. Setting these flags to false disables any output.
  */
 public class Debug {
     public static boolean logoDetectionDebugOutput = false;

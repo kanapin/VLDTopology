@@ -1,7 +1,7 @@
 package logodetection;
 
 /**
- * Created by Intern04 on 29/7/2014.
+ * Parameters for detection.
  */
 public class Parameters {
     public SIFTParameters getSiftParameters() {

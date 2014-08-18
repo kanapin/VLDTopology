@@ -30,7 +30,7 @@ public class RobustMatcher {
     private Serializable.Mat extractedTemplate;
 
     /**
-     * Finds homography between two sets of keypoints using RANSAC {@ref http://en.wikipedia.org/wiki/RANSAC}
+     * Finds homography between two sets of keypoints using <a href="http://en.wikipedia.org/wiki/RANSAC">RANSAC</a>
      * algorithm. Does two iterations: first separates the outliers from inliers,
      * the second iteration performs the RANSAC inliers only to achieve better result.
      * @param logoKeyPoints the key points of the logo template
@@ -88,11 +88,11 @@ public class RobustMatcher {
     }
 
     /**
-     * Performs symmetry test as described in OpenCV cookbook p. 239 - 246, given two sets of matches:
+     * Performs symmetry test as described in OpenCV cookbook pp 239-246, given two sets of matches:
      * from logo to image and from image to logo.
      * @param matches12
      * @param matches21
-     * @return
+     * @return vector of refined matches
      */
     private opencv_features2d.DMatchVectorVector symmetryTest(
             opencv_features2d.DMatchVectorVector matches12,
@@ -118,8 +118,8 @@ public class RobustMatcher {
     }
 
     /**
-     * Perform Lowe's Ratio test
-     * {@ref http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf#page=20}
+     * Perform
+     *  <a href = "http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf#page=20">Lowe's Ratio test</a>
      */
     private opencv_features2d.DMatchVectorVector refineMatches(opencv_features2d.DMatchVectorVector oldMatches) {
         // Ratio of Distances

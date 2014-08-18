@@ -12,9 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Intern04 on 14/8/2014.
+ * Config manager provides methods to load a storm config from a file and access its content.
  */
 public class StormConfigManager {
+    /**
+     * Read config from file path
+     * @param path - the path to the file containing yaml config
+     * @return the Config for this file
+     * @throws FileNotFoundException
+     */
     public static Config readConfig(String path) throws FileNotFoundException {
         Config config = new Config();
         Yaml yaml = new Yaml();
