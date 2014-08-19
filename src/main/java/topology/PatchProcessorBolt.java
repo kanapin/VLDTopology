@@ -99,7 +99,7 @@ public class PatchProcessorBolt extends BaseRichBolt {
                         new Values(frameId, hostPatch, detectedLogo, patchCount ));
             }
         } else {
-            patchQueue.put(frameId, new LinkedList<>());
+            //patchQueue.put(frameId, new LinkedList<>());
         }
         if (templateQueue.containsKey(frameId)) {
             Queue<LogoTemplateUpdate> queue = templateQueue.get(frameId);
@@ -112,7 +112,7 @@ public class PatchProcessorBolt extends BaseRichBolt {
                 detector.incrementPriority(parent, 1);
             }
         } else {
-            templateQueue.put(frameId, new LinkedList<>());
+            //templateQueue.put(frameId, new LinkedList<>());
         }
 
     }
@@ -162,7 +162,7 @@ public class PatchProcessorBolt extends BaseRichBolt {
 
         } else {
             if (Debug.topologyDebugOutput)
-                System.out.println("Received duplicate message");
+                System.out.println("PatchProcessorBolt: Received duplicate message");
         }
     }
 

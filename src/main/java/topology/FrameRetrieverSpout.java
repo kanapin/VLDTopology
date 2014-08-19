@@ -83,7 +83,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(600);
+                Thread.sleep(400);
             }
 
         } catch (FrameGrabber.Exception e) {

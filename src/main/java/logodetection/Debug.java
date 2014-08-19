@@ -6,4 +6,5 @@ package logodetection;
 public class Debug {
     public static boolean logoDetectionDebugOutput = false;
     public static boolean topologyDebugOutput = true;
+    public static boolean memoryOutput = true;
 }
