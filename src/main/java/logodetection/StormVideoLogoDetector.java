@@ -249,6 +249,23 @@ public class StormVideoLogoDetector {
     }
 
     /**
+     * Adds template to the dynamic list of logo templates.
+     * @param identifier The identifier of the patch, from which this template was extracted.
+     * @param wholeFrame Image of the logo template
+     * @param roi Region where this logo template was detected
+     */
+    public void addTemplateByRect(Serializable.PatchIdentifier identifier, Serializable.Mat wholeFrame, Serializable.Rect roi) {
+        if (addedTemplates.size() >= 5)
+            return;
+        Mat image = new Mat(wholeFrame.toJavaCVMat(), roi.toJavaCVRect());
+        Mat descriptor = new Mat();
+        KeyPoint keyPoints = new KeyPoint();
+        sift.detectAndCompute(image, Mat.EMPTY, keyPoints, descriptor);
+        addedTemplates.add(new LogoTemplate(image, keyPoints, descriptor, identifier));
+
+    }
+
+    /**
      * For debug only. Returns the string representation of the content the logo template lists.
      * @see LogoTemplate#toString()
      * @return String representation of the lists.

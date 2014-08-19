@@ -15,6 +15,8 @@ import java.util.Map;
 
 import static topology.StormConfigManager.getInt;
 import static topology.StormConfigManager.getString;
+import static topology.Constants.RAW_FRAME_STREAM;
+import static topology.Constants.PATCH_STREAM;
 
 
 /**
@@ -58,14 +60,13 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         try {
             if (frameId < lastFrameId) {
                 image = grabber.grab();
-                opencv_core.Mat frameMat = new opencv_core.Mat(image);
-                Serializable.Mat sMat = new Serializable.Mat(frameMat);
+                Serializable.Mat sMat = new Serializable.Mat(new opencv_core.Mat(image));
 
                 //TODO get params from config map
                 double fx = .25, fy = .25;
                 double fsx = .33, fsy = .33;
 
-                int W = frameMat.cols(), H = frameMat.rows();
+                int W = sMat.getCols(), H = sMat.getRows();
                 int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
                 int dx = (int) (w * fsx + .5), dy = (int) (h * fsy + .5);
                 int patchCount = 0;
@@ -73,12 +74,12 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     for (int y = 0; y + h <= H; y += dy)
                         patchCount++;
 
+                collector.emit(RAW_FRAME_STREAM, new Values(frameId, sMat, patchCount), frameId);
                 for (int x = 0; x + w <= W; x += dx) {
                     for (int y = 0; y + h <= H; y += dy) {
                         Serializable.PatchIdentifier identifier = new
                                 Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
-
-                        collector.emit("patch-stream", new Values(identifier, sMat, patchCount), identifier.toString());
+                        collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
                     }
                 }
                 frameId ++;
@@ -95,8 +96,8 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream("patch-stream", new Fields("patchIdentifier"));
-        outputFieldsDeclarer.declareStream("frame-stream-to-patch-processor", new Fields("frameId", "frameMat", "patchCount"));
+        outputFieldsDeclarer.declareStream(PATCH_STREAM, new Fields("patchIdentifier", "patchCount"));
+        outputFieldsDeclarer.declareStream(RAW_FRAME_STREAM, new Fields("frameId", "frameMat", "patchCount"));
     }
 
 

@@ -11,6 +11,9 @@ import logodetection.Debug;
 
 import java.util.*;
 
+import static topology.Constants.CACHE_CLEAR_STREAM;
+import static topology.Constants.PROCESSED_FRAME_STREAM;
+
 /**
  * Created by Intern04 on 5/8/2014.
  */
@@ -30,11 +33,11 @@ public class PatchAggregatorBolt extends BaseRichBolt {
         foundRectAccount = new HashMap<>();
     }
 
+    //Fields("frameId", "framePatchIdentifier", "foundRect", "patchCount"));
     @Override
     public void execute(Tuple tuple) {
         Serializable.PatchIdentifier patchIdentifier = (Serializable.PatchIdentifier)tuple.getValueByField("framePatchIdentifier");
-        Serializable.Mat mat        = (Serializable.Mat)tuple.getValueByField("frameMat");
-        int patchCount              = (int)tuple.getValueByField("patchCount");
+        int patchCount              = tuple.getIntegerByField("patchCount");
         Serializable.Rect foundRect = (Serializable.Rect)tuple.getValueByField("foundRect");
 
         int frameId = patchIdentifier.frameId;
@@ -49,21 +52,24 @@ public class PatchAggregatorBolt extends BaseRichBolt {
         /* Updating the account on how many patches of a frame are received */
         if (!frameAccount.containsKey(frameId))
             frameAccount.put(frameId, new HashSet<>());
+
         frameAccount.get(frameId).add(patchIdentifier.roi);
 
         /* If all patches of this frame are collected proceed to the frame aggregator */
         if (frameAccount.get(frameId).size() == patchCount) {
             if (Debug.topologyDebugOutput)
                 System.out.println("All parts of frame " + frameId + " received");
-            collector.emit("stream-to-frame-aggregator", tuple, new Values(frameId, mat, foundRectAccount.get(frameId)));
+            collector.emit(PROCESSED_FRAME_STREAM, tuple, new Values(frameId, foundRectAccount.get(frameId)));
             frameAccount.remove(frameId);
             foundRectAccount.remove(frameId);
+            collector.emit(CACHE_CLEAR_STREAM, tuple, new Values(frameId));
         }
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream("stream-to-frame-aggregator", new Fields("frameId", "frameMat", "foundRectList"));
+        outputFieldsDeclarer.declareStream(PROCESSED_FRAME_STREAM, new Fields("frameId", "foundRectList"));
+        outputFieldsDeclarer.declareStream(CACHE_CLEAR_STREAM, new Fields("frameId"));
     }
 }
