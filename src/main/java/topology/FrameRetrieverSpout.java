@@ -49,6 +49,8 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
             while (++frameId < firstFrameId)
                 grabber.grab();
+            if (Debug.timer)
+                System.err.println("TIME=" + System.currentTimeMillis());
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
@@ -64,7 +66,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
                 //TODO get params from config map
                 double fx = .25, fy = .25;
-                double fsx = .33, fsy = .33;
+                double fsx = .5, fsy = .5;
 
                 int W = sMat.getCols(), H = sMat.getRows();
                 int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
@@ -83,7 +85,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(400);
+                Thread.sleep(300);
             }
 
         } catch (FrameGrabber.Exception e) {

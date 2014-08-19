@@ -1,5 +1,6 @@
 package topology;
 
+import logodetection.Debug;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FrameRecorder;
@@ -83,6 +84,8 @@ public class StreamProducer implements Runnable {
                         recorder.stop();
                         recorder.release();
                         canvasFrame.dispose();
+                        if (Debug.timer)
+                            System.err.println("TIME=" + System.currentTimeMillis());
                     }
                 } else {
                     // if expected frame is not there yet, wait and try again.
