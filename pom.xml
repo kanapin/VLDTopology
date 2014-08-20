@@ -33,7 +33,7 @@
 
     </dependencies>
 
-
+<!--
     <build>
         <plugins>
             <plugin>
@@ -97,15 +97,13 @@
 
         </plugins>
     </build>
-
+-->
 
     <!-- Build Type -->
     <profiles>
         <profile>
             <id>win32</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+
             <properties>
                 <build.type>windows-x86_64</build.type>
             </properties>
@@ -117,6 +115,9 @@
             </properties>
         </profile>
         <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <id>MacOSX</id>
             <properties>
                 <build.type>macosx-x86_64</build.type>

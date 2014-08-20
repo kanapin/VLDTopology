@@ -2,6 +2,7 @@ package topology;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
+import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.generated.StormTopology;
@@ -47,12 +48,15 @@ public class VLDTopology {
                 .setNumTasks(getInt(conf, "FrameAggregatorBolt.tasks"));
 
         StormTopology topology = builder.createTopology();
+        /*
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("first", conf, topology);
-        Thread.sleep(2*60*1000);
+        Thread.sleep(4*60*1000);
         cluster.killTopology("first");
         cluster.shutdown();
-        //StormSubmitter.submitTopology("first", new Config(), topology);
+        */
+
+        StormSubmitter.submitTopology("first", conf, topology);
 
     }
 }

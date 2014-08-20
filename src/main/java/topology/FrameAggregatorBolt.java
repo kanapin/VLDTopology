@@ -17,6 +17,8 @@ import java.util.Map;
 import static topology.Constants.RAW_FRAME_STREAM;
 import static topology.StormConfigManager.getInt;
 import static topology.Constants.PROCESSED_FRAME_STREAM;
+import static topology.StormConfigManager.getString;
+
 /**
  * Created by Intern04 on 5/8/2014.
  */
@@ -44,7 +46,8 @@ public class FrameAggregatorBolt extends BaseRichBolt {
         frameMap = new HashMap<>();
         this.collector = outputCollector;
         try {
-            producer = new StreamProducer(firstFrameId, lastFrameId);
+            String filename = getString(map, "videoDestinationFile");
+            producer = new StreamProducer(firstFrameId, lastFrameId, filename);
             new Thread(producer).start();
         } catch (FrameRecorder.Exception e) {
             e.printStackTrace();

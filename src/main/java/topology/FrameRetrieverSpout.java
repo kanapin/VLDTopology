@@ -27,6 +27,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     private String SOURCE_FILE;
     private FrameGrabber grabber;
     private int frameId;
+    private long lastFrameTime;
 
     int firstFrameId ;
     int lastFrameId ;
@@ -59,6 +60,12 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     opencv_core.IplImage image;
     @Override
     public void nextTuple() {
+        long now = System.currentTimeMillis();
+        if (now - lastFrameTime < 1000){
+            return;
+        }else {
+            lastFrameTime=now;
+        }
         try {
             if (frameId < lastFrameId) {
                 image = grabber.grab();
@@ -85,13 +92,9 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                     }
                 }
                 frameId ++;
-                Thread.sleep(300);
             }
 
         } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            System.err.println("Someone (perhaps you) has shut down this thread");
             e.printStackTrace();
         }
     }

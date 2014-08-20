@@ -27,25 +27,26 @@ public class StreamProducer implements Runnable {
     private boolean finished;
 
     /** Canvas for displaying frames on the screen */
-    private CanvasFrame canvasFrame;
+    //private CanvasFrame canvasFrame;
 
-    /** TODO: put this into config? */
-    final String FILENAME = "2.mp4";
+
 
 
     /** Creates a producer expecting frames in range [firstFrameId, lastFrameId) */
-    public StreamProducer(int firstFrameId, int lastFrameId) throws FrameRecorder.Exception {
+    public StreamProducer(int firstFrameId, int lastFrameId, String filename) throws FrameRecorder.Exception {
+
+
         stream = new PriorityQueue<>();
         this.firstFrameId = firstFrameId;
         this.lastFrameId = lastFrameId;
         nextExpectedFrame = firstFrameId;
 
-        recorder = FrameRecorder.createDefault(FILENAME, 728, 408);
+        recorder = FrameRecorder.createDefault(filename, 728, 408);
         recorder.setFrameRate(25);
         recorder.setVideoQuality(1.0);
         recorder.start();
 
-        canvasFrame = new CanvasFrame("View");
+        //canvasFrame = new CanvasFrame("View");
         finished = false;
     }
 
@@ -79,11 +80,11 @@ public class StreamProducer implements Runnable {
                 if ( (nextFrame = getNextFrame()) != null ) {
                     opencv_core.IplImage image = nextFrame.image.asIplImage();
                     recorder.record(image);
-                    canvasFrame.showImage(image);
+                    //canvasFrame.showImage(image);
                     if (finished) {
                         recorder.stop();
                         recorder.release();
-                        canvasFrame.dispose();
+                        //canvasFrame.dispose();
                         if (Debug.timer)
                             System.err.println("TIME=" + System.currentTimeMillis());
                     }
