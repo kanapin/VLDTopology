@@ -38,6 +38,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
 
+        capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
         frameId = 0;
         firstFrameId = getInt(map, "firstFrameId");
         lastFrameId = getInt(map, "lastFrameId");
@@ -45,7 +46,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         mat = new opencv_core.Mat();
 
         this.collector = spoutOutputCollector;
-        capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
+
 
 
 
