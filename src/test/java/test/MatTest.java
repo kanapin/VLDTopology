@@ -14,10 +14,11 @@ public class MatTest {
     @Test
     public void testMat() {
         String SOURCE_FILE = "/home/storm/logo-dect/video/1.mp4";
+        //String SOURCE_FILE = "/Users/nurlan/Desktop/1.mp4";
         opencv_highgui.VideoCapture capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
 
         opencv_core.Mat mat = new opencv_core.Mat();
-        CanvasFrame canvasFrame = new CanvasFrame("first");
+        //CanvasFrame canvasFrame = new CanvasFrame("first");
 
         int frameId = 0, firstFrameId = 35000, lastFrameId = 35200;
         while (++frameId < firstFrameId) {
@@ -34,10 +35,10 @@ public class MatTest {
             //System.out.println(frameId);
             capture.read(mat);
             Serializable.Mat sMat = new Serializable.Mat(mat);
-            canvasFrame.showImage(sMat.toJavaCVMat().asIplImage());
+            //canvasFrame.showImage(sMat.toJavaCVMat().asIplImage());
         }
 
-        canvasFrame.dispose();
+        //canvasFrame.dispose();
         mat.release();
         capture.release();
     }
