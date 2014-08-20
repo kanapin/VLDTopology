@@ -12,15 +12,15 @@ import topology.Serializable;
  */
 public class MatTest {
     @Test
-    public void testMat() {
-        String SOURCE_FILE = "/home/storm/logo-dect/video/1.mp4";
-        //String SOURCE_FILE = "/Users/nurlan/Desktop/1.mp4";
+    public void runTest() {
+        //String SOURCE_FILE = "/home/storm/logo-dect/video/1.mp4";
+        String SOURCE_FILE = "/Users/nurlan/Desktop/1.mp4";
         opencv_highgui.VideoCapture capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
 
         opencv_core.Mat mat = new opencv_core.Mat();
         //CanvasFrame canvasFrame = new CanvasFrame("first");
 
-        int frameId = 0, firstFrameId = 35000, lastFrameId = 35200;
+        int frameId = 0, firstFrameId = 0, lastFrameId = 200;
         while (++frameId < firstFrameId) {
             if (capture.grab())
                 ;
@@ -39,7 +39,7 @@ public class MatTest {
         }
 
         //canvasFrame.dispose();
-        mat.release();
+        //mat.release();
         capture.release();
     }
 }
