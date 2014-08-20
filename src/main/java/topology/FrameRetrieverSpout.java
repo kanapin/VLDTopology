@@ -47,14 +47,11 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
         this.collector = spoutOutputCollector;
 
-
-
-
         if (Debug.topologyDebugOutput)
             System.out.println("Grabber started");
 
         while (++frameId < firstFrameId)
-            capture.read(mat);
+            capture.grab();
         if (Debug.timer)
             System.err.println("TIME=" + System.currentTimeMillis());
 
@@ -72,6 +69,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
         if (frameId < lastFrameId) {
             capture.read(mat);
+
             Serializable.Mat sMat = new Serializable.Mat(mat);
 
             //TODO get params from config map
