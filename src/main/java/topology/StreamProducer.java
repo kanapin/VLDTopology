@@ -86,7 +86,7 @@ public class StreamProducer implements Runnable {
                         recorder.release();
                         //canvasFrame.dispose();
                         if (Debug.timer)
-                            System.err.println("TIME=" + System.currentTimeMillis());
+                            System.out.println("TIME=" + System.currentTimeMillis());
                     }
                 } else {
                     // if expected frame is not there yet, wait and try again.

@@ -43,6 +43,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         lastFrameId = getInt(map, "lastFrameId");
         SOURCE_FILE = getString(map, "videoSourceFile");
         capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
+        System.out.println("Created capture: " + SOURCE_FILE);
         mat = new opencv_core.Mat();
 
         this.collector = spoutOutputCollector;
@@ -53,7 +54,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         while (++frameId < firstFrameId)
             capture.grab();
         if (Debug.timer)
-            System.err.println("TIME=" + System.currentTimeMillis());
+            System.out.println("TIME=" + System.currentTimeMillis());
 
     }
 
@@ -66,11 +67,19 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         }else {
             lastFrameTime=now;
         }
+        if (mat == null || mat.isNull())
+            System.err.println("nextTuple(): mat is null!!!");
 
         if (frameId < lastFrameId) {
             capture.read(mat);
 
+            System.out.println("Current frame = " + frameId);
+            System.out.println("Mat mat: rows() = " + mat.rows() + ", cols() = " + mat.cols() + ", mat.type() = " + mat.type());
+
             Serializable.Mat sMat = new Serializable.Mat(mat);
+
+            System.out.println("Serializable.Mat mat: rows() = " + sMat.getRows() + ", cols() = " + sMat.getCols() +
+                    ", mat.type() = " + sMat.getType());
 
             //TODO get params from config map
             double fx = .25, fy = .25;
