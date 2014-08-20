@@ -12,7 +12,7 @@ import topology.Serializable;
  * chance to be removed from the list of logo templates. Finally, each logo template has its own identifier, so
  * that we can distinguish between them.</p>
  * <p>How can we uniquely identify logo template? Since any logo template was
- * extracted from some frame’s patch, each logo template is identified by patchIdentifier. patchIdentifier is the
+ * extracted from some frame's patch, each logo template is identified by patchIdentifier. patchIdentifier is the
  * identifier of the patch from which this template was extracted. This is only applied to dynamic list of templates
  * that is created during real-time detection. Those that were there from the beginning (original logo templates,
  * loaded during initialization) have not been extracted from the video, and hence their patch identifier have
