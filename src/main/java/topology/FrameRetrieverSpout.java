@@ -8,6 +8,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import logodetection.Debug;
 import org.bytedeco.javacpp.opencv_core;
+import org.bytedeco.javacpp.opencv_highgui;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 
@@ -25,12 +26,14 @@ import static topology.Constants.PATCH_STREAM;
 public class FrameRetrieverSpout extends BaseRichSpout {
     SpoutOutputCollector collector;
     private String SOURCE_FILE;
-    private FrameGrabber grabber;
+    //private FrameGrabber grabber;
+    private opencv_highgui.VideoCapture capture;
     private int frameId;
     private long lastFrameTime;
 
     int firstFrameId ;
     int lastFrameId ;
+    opencv_core.Mat mat;
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
@@ -39,25 +42,24 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         firstFrameId = getInt(map, "firstFrameId");
         lastFrameId = getInt(map, "lastFrameId");
         SOURCE_FILE = getString(map, "videoSourceFile");
+        mat = new opencv_core.Mat();
 
         this.collector = spoutOutputCollector;
-        grabber = new OpenCVFrameGrabber(SOURCE_FILE);
+        capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
 
-        try {
-            grabber.start();
-            if (Debug.topologyDebugOutput)
-                System.out.println("Grabber started");
 
-            while (++frameId < firstFrameId)
-                grabber.grab();
-            if (Debug.timer)
-                System.err.println("TIME=" + System.currentTimeMillis());
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
-        }
+
+        if (Debug.topologyDebugOutput)
+            System.out.println("Grabber started");
+
+        while (++frameId < firstFrameId)
+            capture.read(mat);
+        if (Debug.timer)
+            System.err.println("TIME=" + System.currentTimeMillis());
+
     }
 
-    opencv_core.IplImage image;
+
     @Override
     public void nextTuple() {
         long now = System.currentTimeMillis();
@@ -66,37 +68,35 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         }else {
             lastFrameTime=now;
         }
-        try {
-            if (frameId < lastFrameId) {
-                image = grabber.grab();
-                Serializable.Mat sMat = new Serializable.Mat(new opencv_core.Mat(image));
 
-                //TODO get params from config map
-                double fx = .25, fy = .25;
-                double fsx = .5, fsy = .5;
+        if (frameId < lastFrameId) {
+            capture.read(mat);
+            Serializable.Mat sMat = new Serializable.Mat(mat);
 
-                int W = sMat.getCols(), H = sMat.getRows();
-                int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
-                int dx = (int) (w * fsx + .5), dy = (int) (h * fsy + .5);
-                int patchCount = 0;
-                for (int x = 0; x + w <= W; x += dx)
-                    for (int y = 0; y + h <= H; y += dy)
-                        patchCount++;
+            //TODO get params from config map
+            double fx = .25, fy = .25;
+            double fsx = .5, fsy = .5;
 
-                collector.emit(RAW_FRAME_STREAM, new Values(frameId, sMat, patchCount), frameId);
-                for (int x = 0; x + w <= W; x += dx) {
-                    for (int y = 0; y + h <= H; y += dy) {
-                        Serializable.PatchIdentifier identifier = new
-                                Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
-                        collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
-                    }
+            int W = sMat.getCols(), H = sMat.getRows();
+            int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
+            int dx = (int) (w * fsx + .5), dy = (int) (h * fsy + .5);
+            int patchCount = 0;
+            for (int x = 0; x + w <= W; x += dx)
+                for (int y = 0; y + h <= H; y += dy)
+                    patchCount++;
+
+            collector.emit(RAW_FRAME_STREAM, new Values(frameId, sMat, patchCount), frameId);
+            for (int x = 0; x + w <= W; x += dx) {
+                for (int y = 0; y + h <= H; y += dy) {
+                    Serializable.PatchIdentifier identifier = new
+                            Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
+                    collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
                 }
-                frameId ++;
             }
-
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
+            frameId ++;
         }
+
+
     }
 
     @Override
