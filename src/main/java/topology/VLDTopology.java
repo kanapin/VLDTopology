@@ -23,8 +23,11 @@ public class VLDTopology {
 
 
     public static void main(String args[]) throws InterruptedException, AlreadyAliveException, InvalidTopologyException, FileNotFoundException {
-
-        Config conf = readConfig("config.yaml");
+        if (args.length != 1) {
+            System.out.println("Enter path to config file!");
+            System.exit(0);
+        }
+        Config conf = readConfig(args[0]);
 
         TopologyBuilder builder = new TopologyBuilder();
 
@@ -56,7 +59,7 @@ public class VLDTopology {
         cluster.shutdown();
         */
 
-        conf.setNumWorkers(2);
+        conf.setNumWorkers(getInt(conf, "numberOfWorkers"));
         StormSubmitter.submitTopology("first", conf, topology);
 
     }

@@ -22,7 +22,7 @@ firstFrameId: 35000
 
 # Last frame where detection should end (exclusive).
 # Frames in range [firstFrameId, lastFrameId-1] will be processed
-lastFrameId: 35100
+lastFrameId: 35200
 
 # Filename to save the output file to
 videoDestinationFile: '/home/storm/logo-dect/video/2.mp4'
@@ -31,10 +31,10 @@ videoDestinationFile: '/home/storm/logo-dect/video/2.mp4'
 FrameRetrieverSpout.parallelism: 1
 
 # Amount of parallelism for PatchProcessorBolt
-PatchProcessorBolt.parallelism: 4
+PatchProcessorBolt.parallelism: 8
 
 # Amount of parallelism for PatchAggregatorBolt
-PatchAggregatorBolt.parallelism: 1
+PatchAggregatorBolt.parallelism: 2
 
 # Amount of parallelism for FrameAggregatorBolt. Should be always 1.
 FrameAggregatorBolt.parallelism: 1
@@ -50,5 +50,11 @@ PatchAggregatorBolt.tasks: 2
 
 #
 FrameAggregatorBolt.tasks: 1
+
+# Number of workers in the topology
+numberOfWorkers: 2
+
+# Delay between input frames in milliseconds
+inputFrameDelay: 300
 
 

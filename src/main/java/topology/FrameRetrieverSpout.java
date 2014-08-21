@@ -29,9 +29,9 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     SpoutOutputCollector collector;
     private String SOURCE_FILE;
     private FFmpegFrameGrabber grabber;
-    //private opencv_highgui.VideoCapture capture;
     private int frameId;
     private long lastFrameTime;
+    private int delayInMS;
 
     int firstFrameId ;
     int lastFrameId ;
@@ -43,11 +43,11 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         firstFrameId = getInt(map, "firstFrameId");
         lastFrameId = getInt(map, "lastFrameId");
         SOURCE_FILE = getString(map, "videoSourceFile");
-        //capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
         grabber = new FFmpegFrameGrabber(SOURCE_FILE);
         opencv_features2d.KeyPoint kp = new opencv_features2d.KeyPoint();
         System.out.println("Created capture: " + SOURCE_FILE);
 
+        delayInMS =  getInt(map, "inputFrameDelay");
 
         this.collector = spoutOutputCollector;
         try {
@@ -75,7 +75,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         long now = System.currentTimeMillis();
-        if (now - lastFrameTime < 500){
+        if (now - lastFrameTime < delayInMS){
             return;
         }else {
             lastFrameTime=now;
@@ -86,13 +86,8 @@ public class FrameRetrieverSpout extends BaseRichSpout {
             try {
                 image = grabber.grab();
                 mat = new opencv_core.Mat(image);
-                System.out.println("Current frame = " + frameId);
-                System.out.println("Mat mat: rows() = " + mat.rows() + ", cols() = " + mat.cols() + ", mat.type() = " + mat.type());
 
                 Serializable.Mat sMat = new Serializable.Mat(mat);
-
-                System.out.println("Serializable.Mat mat: rows() = " + sMat.getRows() + ", cols() = " + sMat.getCols() +
-                        ", mat.type() = " + sMat.getType());
 
                 //TODO get params from config map
                 double fx = .25, fy = .25;
