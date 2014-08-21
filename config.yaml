@@ -22,7 +22,7 @@ firstFrameId: 35000
 
 # Last frame where detection should end (exclusive).
 # Frames in range [firstFrameId, lastFrameId-1] will be processed
-lastFrameId: 35200
+lastFrameId: 35100
 
 # Filename to save the output file to
 videoDestinationFile: '/home/storm/logo-dect/video/2.mp4'
