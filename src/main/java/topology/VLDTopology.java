@@ -56,7 +56,7 @@ public class VLDTopology {
         cluster.shutdown();
         */
 
-        //conf.setNumWorkers(3);
+        conf.setNumWorkers(2);
         StormSubmitter.submitTopology("first", conf, topology);
 
     }
