@@ -75,7 +75,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         long now = System.currentTimeMillis();
-        if (now - lastFrameTime < 1000){
+        if (now - lastFrameTime < 500){
             return;
         }else {
             lastFrameTime=now;

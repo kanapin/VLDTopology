@@ -43,7 +43,7 @@ FrameAggregatorBolt.parallelism: 1
 FrameRetrieverSpout.tasks: 1
 
 #
-PatchProcessorBolt.tasks: 4
+PatchProcessorBolt.tasks: 8
 
 #
 PatchAggregatorBolt.tasks: 2
