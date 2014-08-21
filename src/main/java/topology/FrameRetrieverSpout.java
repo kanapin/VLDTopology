@@ -10,6 +10,7 @@ import logodetection.Debug;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacpp.opencv_highgui;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 
@@ -27,7 +28,7 @@ import static topology.Constants.PATCH_STREAM;
 public class FrameRetrieverSpout extends BaseRichSpout {
     SpoutOutputCollector collector;
     private String SOURCE_FILE;
-    private FrameGrabber grabber;
+    private FFmpegFrameGrabber grabber;
     //private opencv_highgui.VideoCapture capture;
     private int frameId;
     private long lastFrameTime;
@@ -43,7 +44,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         lastFrameId = getInt(map, "lastFrameId");
         SOURCE_FILE = getString(map, "videoSourceFile");
         //capture = new opencv_highgui.VideoCapture(SOURCE_FILE);
-        grabber = new OpenCVFrameGrabber(SOURCE_FILE);
+        grabber = new FFmpegFrameGrabber(SOURCE_FILE);
         opencv_features2d.KeyPoint kp = new opencv_features2d.KeyPoint();
         System.out.println("Created capture: " + SOURCE_FILE);
 
