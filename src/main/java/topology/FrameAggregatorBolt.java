@@ -62,6 +62,11 @@ public class FrameAggregatorBolt extends BaseRichBolt {
         if (streamId.equals(PROCESSED_FRAME_STREAM)) {
             int frameId = tuple.getIntegerByField("frameId");
 
+            if (frameId == firstFrameId)
+                System.out.println("FIRST_FRAME=" + System.currentTimeMillis());
+            else if (frameId == lastFrameId - 1)
+                System.out.println("LAST_FRAME=" + System.currentTimeMillis());
+
             List<Serializable.Rect> list = (List<Serializable.Rect>)tuple.getValueByField("foundRectList");
             opencv_core.Mat mat = null;
             if (frameMap.containsKey(frameId)) {
