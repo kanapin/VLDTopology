@@ -37,7 +37,7 @@ public class InputStreamTest {
         grabber.start();
         frameId = 0;
         firstFrameId = 0;
-        lastFrameId = 1000;
+        lastFrameId = 100;
 
         while (++frameId < firstFrameId)
             grabber.grab();
