@@ -26,7 +26,7 @@ public class Serializable {
      * Kryo Serializable Mat class.
      * Essential fields are image data itself, rows and columns count and type of the data.
      */
-    public static class Mat implements KryoSerializable {
+    public static class Mat implements KryoSerializable, java.io.Serializable {
         private byte[] data;
         private int rows, cols, type;
 
@@ -110,7 +110,7 @@ public class Serializable {
      * Kryo Serializable Rect class.
      *
      */
-    public static class Rect implements KryoSerializable {
+    public static class Rect implements KryoSerializable, java.io.Serializable {
         /** x, y, width, height - x and y coordinates of the left upper corner of the rectangle, its width and height */
         public int x, y, width, height;
 
@@ -177,7 +177,7 @@ public class Serializable {
      * Each patch is uniquely identified by the id of its frame and by the rectangle it corresponds to.
      *
      */
-    public static class PatchIdentifier implements KryoSerializable {
+    public static class PatchIdentifier implements KryoSerializable, java.io.Serializable {
         /** Frame id of this patch */
         public int frameId;
         /** Rectangle or Region of Interest of this patch. */
