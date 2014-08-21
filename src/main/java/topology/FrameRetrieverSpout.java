@@ -51,6 +51,9 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         this.collector = spoutOutputCollector;
         try {
             grabber.start();
+            while (++frameId < firstFrameId)
+                grabber.grab();
+
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
@@ -60,12 +63,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         if (Debug.topologyDebugOutput)
             System.out.println("Grabber started");
 
-        while (++frameId < firstFrameId)
-            try {
-                grabber.grab();
-            } catch (FrameGrabber.Exception e) {
-                e.printStackTrace();
-            }
+
         if (Debug.timer)
             System.out.println("TIME=" + System.currentTimeMillis());
 
