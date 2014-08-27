@@ -136,8 +136,7 @@ public class StormVideoLogoDetector {
         extractedTemplate = null;
         parent = null;
 
-        return;
-        /*
+
         // Obtain the keypoints, descriptors of the patch
         Mat r = new Mat(frame, roi);
         KeyPoint keyPoints = new KeyPoint();
@@ -184,7 +183,6 @@ public class StormVideoLogoDetector {
         rr.release();
         keyPoints.deallocate();
         testDescriptors.release();
-        */
     }
 
     /**
