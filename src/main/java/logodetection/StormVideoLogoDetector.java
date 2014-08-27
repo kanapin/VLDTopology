@@ -130,11 +130,14 @@ public class StormVideoLogoDetector {
      * @param roi The rectangle corresponding the this patch
      */
     public void detectLogosInRoi(Mat frame, Rect roi) {
+
         // Make the results of previous detection null
         foundRect = null;
         extractedTemplate = null;
         parent = null;
 
+        return;
+        /*
         // Obtain the keypoints, descriptors of the patch
         Mat r = new Mat(frame, roi);
         KeyPoint keyPoints = new KeyPoint();
@@ -181,6 +184,7 @@ public class StormVideoLogoDetector {
         rr.release();
         keyPoints.deallocate();
         testDescriptors.release();
+        */
     }
 
     /**
